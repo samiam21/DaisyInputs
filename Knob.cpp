@@ -18,12 +18,19 @@ void Knob::Init(DaisySeed *hardware, uint8_t chn, float &valueToSet, float pMinV
     maxValue = pMaxValue;
 
     // Set the initial value
-    knobReading = hw->adc.GetFloat(knobChannel);
-    valueToSet = GetNewValue(knobReading);
+    if (knobChannel != KNOB_NO_CHN)
+    {
+        knobReading = hw->adc.GetFloat(knobChannel);
+        valueToSet = GetNewValue(knobReading);
+    }
 }
 
 bool Knob::SetNewValue(float &valueToSet)
 {
+    // Check for a valid knob channel
+    if (knobChannel == KNOB_NO_CHN)
+        return true;
+
     bool ret = false;
 
     // Read the knob
@@ -51,20 +58,20 @@ float Knob::GetNewValue(float newKnobReading)
     {
         // Set the reading to min
         knobReading = minKnobReadingValue;
-        //debugPrintln(hw, "MIN!");
+        // debugPrintln(hw, "MIN!");
     }
     // Check for max value, accounting for jitter
     else if (newKnobReading >= (maxKnobReadingValue - knobJitter))
     {
         // Set the reading to max
         knobReading = maxKnobReadingValue;
-        //debugPrintln(hw, "MAX!");
+        // debugPrintln(hw, "MAX!");
     }
     // Standard reading
     else
     {
         knobReading = newKnobReading;
-        //debugPrintlnF(hw, "%f", newKnobReading);
+        // debugPrintlnF(hw, "%f", newKnobReading);
     }
 
     // Get the new value
